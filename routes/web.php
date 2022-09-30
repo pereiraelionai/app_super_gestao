@@ -18,33 +18,36 @@ use Illuminate\Support\Facades\Route;
 //incluindo middleware nas rotas
 //Route::get('/', 'PrincipalController@principal')->name('site.index')->middleware(LogAcessoMidlleware::class);
 Route::get('/', 'PrincipalController@principal')->name('site.index')->middleware('log.acesso');
-
 Route::get('/sobre-nos', 'SobreNosController@sobreNos')->name('site.sobrenos');
-
 Route::get('/contato', 'ContatoController@contato')->name('site.contato')->middleware('log.acesso');
 Route::post('/contato', 'ContatoController@salvar')->name('site.contato');
-
-Route::get('/login', function () {
-    return 'Login';
-})->name('site.login');
-
+Route::get('/login/{erro?}', 'LoginController@index')->name('site.login');
+Route::post('/login', 'LoginController@autenticar')->name('site.login');
 Route::prefix('/app')->middleware('log.acesso', 'autenticacao:padrao,visitante')->group(function () {
-    Route::get('/clientes', function () {
-        return 'Clientes';
-    })->name('app.clientes');
+    Route::get('/home', 'HomeController@index')->name('app.home');
+    Route::get('/sair', 'LoginController@sair')->name('app.sair');
     
-    Route::get('/fornecedores', 'FornecedorController@index')->name('site.fornecedores');
+    Route::get('/fornecedor', 'FornecedorController@index')->name('app.fornecedor');
+    Route::post('/fornecedor/listar', 'FornecedorController@listar')->name('app.fornecedor.listar');
+    Route::get('/fornecedor/listar', 'FornecedorController@listar')->name('app.fornecedor.listar');
+    Route::get('/fornecedor/editar/{id}/{msg?}', 'FornecedorController@editar')->name('app.fornecedor.editar');
+    Route::get('/fornecedor/adicionar', 'FornecedorController@adicionar')->name('app.fornecedor.adicionar');
+    Route::post('/fornecedor/adicionar', 'FornecedorController@adicionar')->name('app.fornecedor.adicionar');
+    Route::get('/fornecedor/excluir/{id}', 'FornecedorController@excluir')->name('app.fornecedor.excluir');
     
-    Route::get('/produtos', function () {
-        return 'Produtos';
-    })->name('app.produtos');
-});
+    Route::get('pedido-produto/create/{pedido}', 'PedidoProdutoController@create')->name('pedido-produto.create');
+    Route::post('pedido-produto/store/{pedido}', 'PedidoProdutoController@store')->name('pedido-produto.store');
+    Route::delete('pedido-produto.destroy/{pedidoProduto}/{pedido_id}', 'PedidoProdutoController@destroy')->name('pedido-produto.destroy');
 
+    Route::resource('produto', 'ProdutoController');
+    Route::resource('cliente', 'ClienteController');
+    Route::resource('pedido', 'PedidoController');
+    
+});
 //rota de contigencia
 Route::fallback(function () {
     echo "A rota acessada não existe, <a href='/'>clique aqui</a> para ir para a página inicial.";
 });
-
 Route::get('/teste/{p1}/{p2}', 'TesteController@teste')->name('teste');
 
 
